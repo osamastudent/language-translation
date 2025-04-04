@@ -1,0 +1,125 @@
+************ in en.json ************
+{
+    "1st_year": "1st Year",
+    "2nd_year": "2nd Year",
+    "3rd_year": "3rd Year",
+    "4th_year": "4th Year",
+    "5th_year": "5th Year",
+    "6th_year": "6th Year",
+    "7th_year": "7th Year",
+    "8th_year": "8th Year",
+    "1st_year_semester": "Semester 1",
+    "2nd_year_semester": "Semester 2",
+    "3rd_year_semester": "Semester 3",
+    "4th_year_semester": "Semester 4",
+
+}
+
+
+************ in ko.json ************
+{
+    "1st_year": "1학년",
+    "1st_year_semester": "학기 생성 및 관리 1",
+    "2nd_year": "2학년",
+    "2nd_year_semester": "학기 생성 및 관리  2",
+    "3rd_year": "3학년",
+    "3rd_year_semester": "학기 생성 및 관리 3",
+    "4th_year": "4학년",
+    "4th_year_semester": "학기 생성 및 관리 4",
+    "5th_year": "5학년",
+    "6th_year": "6학년",
+    "7th_year": "7학년",
+    "8th_year": "8학년",
+    "absent": " 결석",
+}
+
+************ in blade file ************
+
+
+                				<li><a href="#">3. {{ __('1st_year') }}</a></li>
+                				<li><a href="#">4. {{ __('2nd_year') }}</a></li>
+                				<li><a href="#">5. {{ __('3rd_year') }}</a></li>
+                				<li><a href="#">6. {{ __('4th_year') }}</a></li>
+                				<li><a href="#">7. {{ __('5th_year') }} </a></li>
+
+ like his jitni keys define key hogi or jahan jahan use krna ho wahn blade file mai isa tareeqay sai call krni hay 
+
+
+
+
+********* in language modal************
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Session;
+
+class Language extends Model
+{
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'code', 'description', 'direction', 'default', 'status',
+    ];
+
+    // Language Version
+    static public function version()
+    {
+        if(Session()->has('locale')){
+
+            $version = Language::where('code', Session()->get('locale'))->first();
+        }
+        else{
+            $version = Language::where('default', 1)->first();
+        }
+
+        return $version;
+    }
+}
+
+
+
+
+
+******************* in blade file *************************
+
+<div class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                            @php 
+                            $version = App\Models\Language::version(); 
+                            @endphp
+                            <i class="fas fa-language"></i> {{ $version->name }}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right notification">
+                            <div class="noti-head">
+                                <h6 class="d-inline-block m-b-0">{{ trans_choice('module_language', 2) }}</h6>
+                            </div>
+                            <ul class="noti-body">
+                                @foreach($user_languages as $user_language)
+                                <li class="notification @if(\Session()->get('locale') == $user_language->code) active @endif">
+                                    <a class="language" href="{{ route('version', $user_language->code) }}">{{ $user_language->name }} </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+
+
+
+
+**********************In route************************
+// Set Lang Version
+Route::get('locale/language/{locale}', function ($locale){
+
+    \Session::put('locale', $locale);
+
+    \App::setLocale($locale);
+
+    return redirect()->back();
+    
+})->name('version');
